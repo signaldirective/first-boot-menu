@@ -1,0 +1,6 @@
+"learn.make-it-real": {
+  "icon": "✳",
+  "label": "Make It Real",
+  "description": "Ask what your computer could do",
+  "action": "omarchy shell shell summon io.github.signaldirective.make-it-real '{}'"
+}

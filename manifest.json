@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.signaldirective.make-it-real",
+  "name": "Make It Real",
+  "version": "0.1.0",
+  "author": "Signal Directive",
+  "license": "MIT",
+  "description": "An interactive first-run welcome that shows how an Omarchy agent can discover, customize, or create what you need.",
+  "kinds": ["panel"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "panel": "Panel.qml"
+  }
+}
