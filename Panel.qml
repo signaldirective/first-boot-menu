@@ -12,14 +12,14 @@ Item {
   readonly property string pluginId: "io.github.signaldirective.make-it-real"
   readonly property string home: Quickshell.env("HOME")
   readonly property string stateDirectory: home + "/.local/state/omarchy/make-it-real"
-  readonly property string statePath: stateDirectory + "/welcome-seen"
+  readonly property string statePath: stateDirectory + "/welcome-mode"
   readonly property string starterPrompt: "I'm new to Omarchy. Show me how to change my wallpaper using the built-in controls. Give me the exact menu path and keyboard shortcut. Explain what each step does. Don't change anything."
 
   property var shell: null
   property var manifest: null
   property bool opened: false
   property bool firstRunChecked: false
-  property bool markerWriteStarted: false
+  property bool dontShowAgain: false
   property bool copyingLesson: false
   property bool openTerminalAfterCopy: false
   property string statusText: ""
@@ -31,7 +31,6 @@ Item {
   }
 
   function close() {
-    if (opened || surface.visible) markWelcomeSeen()
     closingFromShell = true
     opened = false
     surface.visible = false
@@ -46,12 +45,12 @@ Item {
   function resolveFirstRun(raw) {
     if (firstRunChecked) return
     firstRunChecked = true
-    if (String(raw || "").trim() !== "seen") firstRunTimer.restart()
+    dontShowAgain = String(raw || "").trim() === "disabled"
+    if (!dontShowAgain) firstRunTimer.restart()
   }
 
-  function markWelcomeSeen() {
-    if (markerWriteStarted) return
-    markerWriteStarted = true
+  function setDontShowAgain(enabled) {
+    dontShowAgain = enabled === true
     ensureStateDirectory.running = true
   }
 
@@ -79,8 +78,8 @@ Item {
     statusText = openTerminalAfterCopy
       ? "Example copied. The terminal is opening; type opencode, then paste and send the question."
       : "Example copied. Open a terminal with Super + Return, type opencode, then paste and send the question."
-    markWelcomeSeen()
     if (openTerminalAfterCopy) {
+      setDontShowAgain(true)
       requestClose()
       terminalTimer.start()
     }
@@ -89,7 +88,6 @@ Item {
   function handleWindowClose() {
     if (!opened) return
     opened = false
-    markWelcomeSeen()
     if (!closingFromShell && shell && typeof shell.hide === "function")
       shell.hide(pluginId)
   }
@@ -103,7 +101,7 @@ Item {
   }
 
   function openTerminalAfterManualCopy() {
-    markWelcomeSeen()
+    setDontShowAgain(true)
     requestClose()
     terminalTimer.start()
   }
@@ -142,13 +140,19 @@ Item {
     id: ensureStateDirectory
     command: ["mkdir", "-p", root.stateDirectory]
     onExited: function(exitCode) {
-      if (exitCode === 0) writeWelcomeMarker.running = true
+      if (exitCode === 0) stateWriter.running = true
     }
   }
 
   Process {
-    id: writeWelcomeMarker
-    command: ["touch", root.statePath]
+    id: stateWriter
+    command: ["tee", root.statePath]
+    stdinEnabled: true
+    stdout: StdioCollector { waitForEnd: true }
+    onStarted: {
+      write(root.dontShowAgain ? "disabled\n" : "enabled\n")
+      stdinEnabled = false
+    }
   }
 
   // Keep the user’s prompt out of the process list: wl-copy receives it on stdin.
@@ -297,7 +301,7 @@ Item {
                 anchors.margins: Style.space(12)
                 spacing: Style.space(6)
 
-                Text { text: "01  /  OPEN"; color: Color.cyan; font.family: Style.font.family; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 1 }
+                Text { text: "01  /  OPEN"; color: Color.accent; font.family: Style.font.family; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 1 }
                 Text { text: "Super + Return"; color: Color.foreground; font.family: Style.font.family; font.pixelSize: Style.font.subtitle; font.bold: true }
                 Text { text: "That opens your terminal."; color: Qt.darker(Color.foreground, 1.45); font.family: Style.font.family; font.pixelSize: Style.font.caption }
               }
@@ -333,7 +337,7 @@ Item {
                 anchors.margins: Style.space(12)
                 spacing: Style.space(6)
 
-                Text { text: "03  /  ASK"; color: Color.yellow; font.family: Style.font.family; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 1 }
+                Text { text: "03  /  ASK"; color: Color.foreground; font.family: Style.font.family; font.pixelSize: Style.font.caption; font.bold: true; font.letterSpacing: 1 }
                 Text { text: "Outcome + context"; color: Color.foreground; font.family: Style.font.family; font.pixelSize: Style.font.subtitle; font.bold: true; wrapMode: Text.WordWrap }
                 Text { text: "Say what you want, what you know, and what not to change."; color: Qt.darker(Color.foreground, 1.45); font.family: Style.font.family; font.pixelSize: Style.font.caption; wrapMode: Text.WordWrap }
               }
@@ -408,7 +412,7 @@ Item {
 
               Text {
                 text: "WHEN YOU WANT TO MAKE SOMETHING"
-                color: Color.yellow
+                color: Color.accent
                 font.family: Style.font.family
                 font.pixelSize: Style.font.caption
                 font.bold: true
@@ -480,13 +484,12 @@ Item {
         Layout.fillWidth: true
         spacing: Style.space(12)
 
-        Text {
+        Toggle {
           Layout.fillWidth: true
-          text: "Copying the question does not send it or launch OpenCode. You choose when to start."
-          color: Qt.darker(Color.foreground, 1.55)
-          font.family: Style.font.family
-          font.pixelSize: Style.font.caption
-          wrapMode: Text.WordWrap
+          label: "Do not show again"
+          description: "Reopen anytime from Learn → Make It Real."
+          checked: root.dontShowAgain
+          onClicked: root.setDontShowAgain(!root.dontShowAgain)
         }
 
         Button {

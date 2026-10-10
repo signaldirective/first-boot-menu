@@ -28,17 +28,17 @@ Install the public repository and enable the plugin:
 omarchy plugin add https://github.com/signaldirective/first-boot-menu --enable
 ```
 
-On first enable, the welcome panel opens once. Dismissing it records a one-word
-marker at
-`~/.local/state/omarchy/make-it-real/welcome-seen`. Press **Copy question + open
+The welcome opens at shell startup until **Do not show again** is enabled or the
+user starts the terminal lesson. That preference is stored in
+`~/.local/state/omarchy/make-it-real/welcome-mode`. Press **Copy question + open
 terminal**, type `opencode`, press Enter, paste the sample question, and send it.
 The plugin never sends the prompt to an agent; OpenCode only starts after you
 type its command in the terminal.
 
-To see the first-run panel again, remove that marker and summon the plugin:
+To see the first-run panel again, remove the preference file and summon the plugin:
 
 ```bash
-rm ~/.local/state/omarchy/make-it-real/welcome-seen
+rm ~/.local/state/omarchy/make-it-real/welcome-mode
 omarchy shell shell summon io.github.signaldirective.make-it-real '{}'
 ```
 
