@@ -100,6 +100,22 @@ Item {
     Quickshell.execDetached(["omarchy", "theme", "switcher"])
   }
 
+  // Four doors out of the panel, in the order a new user needs them: what this
+  // thing is, who else is using it, what it can look like, and what it can do.
+  // Discord goes through Omarchy's own launcher so an installed Discord app
+  // wins over a browser tab.
+  readonly property string websiteUrl: "https://omarchy.org/"
+  readonly property string themesUrl: "https://omarchy.org/themes/"
+  readonly property string pluginsUrl: "https://plugins.omarchy.org"
+
+  function openLink(url) {
+    Quickshell.execDetached(["omarchy", "launch", "browser", url])
+  }
+
+  function joinDiscord() {
+    Quickshell.execDetached(["omarchy", "launch", "discord", "community"])
+  }
+
   function openTerminalAfterManualCopy() {
     setDontShowAgain(true)
     requestClose()
@@ -442,6 +458,73 @@ Item {
               text: "Try the theme picker"
               focusable: true
               onClicked: root.openThemePicker()
+            }
+          }
+
+          BorderSurface {
+            Layout.fillWidth: true
+            implicitHeight: linksColumn.implicitHeight + Style.space(24)
+            radius: Style.cornerRadius
+            color: Qt.rgba(Color.foreground.r, Color.foreground.g, Color.foreground.b, 0.035)
+            borderSpec: Border.surfaceSpec("popups", "border", Color.popups.border, Math.max(1, Style.normalBorderWidth))
+
+            Column {
+              id: linksColumn
+              anchors.fill: parent
+              anchors.margins: Style.space(14)
+              spacing: Style.space(10)
+
+              Text {
+                text: "OMARCHY, ON THE WEB"
+                color: Color.accent
+                font.family: Style.font.family
+                font.pixelSize: Style.font.caption
+                font.bold: true
+                font.letterSpacing: 1
+              }
+
+              Text {
+                width: parent.width
+                text: "The manual for anything that is still unclear, the community when something misbehaves, and more themes and plugins for when you are ready to make it yours."
+                color: Qt.darker(Color.foreground, 1.45)
+                font.family: Style.font.family
+                font.pixelSize: Style.font.caption
+                wrapMode: Text.WordWrap
+              }
+
+              RowLayout {
+                width: parent.width
+                spacing: Style.space(8)
+
+                Button {
+                  Layout.fillWidth: true
+                  text: "Omarchy.org"
+                  iconText: "\uf0ac"
+                  focusable: true
+                  onClicked: root.openLink(root.websiteUrl)
+                }
+                Button {
+                  Layout.fillWidth: true
+                  text: "Discord"
+                  iconText: "\uf392"
+                  focusable: true
+                  onClicked: root.joinDiscord()
+                }
+                Button {
+                  Layout.fillWidth: true
+                  text: "Themes"
+                  iconText: "\uf53f"
+                  focusable: true
+                  onClicked: root.openLink(root.themesUrl)
+                }
+                Button {
+                  Layout.fillWidth: true
+                  text: "Plugins"
+                  iconText: "\uf1e6"
+                  focusable: true
+                  onClicked: root.openLink(root.pluginsUrl)
+                }
+              }
             }
           }
 

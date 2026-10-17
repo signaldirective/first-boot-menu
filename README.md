@@ -17,8 +17,16 @@ The walkthrough gives the user three concrete steps:
   constraints, and ask for a plan before approving changes.
 
 It also opens the real Omarchy menu and theme picker so users can explore and
-see the desktop respond. The plugin never launches OpenCode or sends a prompt;
-the user starts the agent and sends the example themselves.
+see the desktop respond, and it links out to the four places a new user
+eventually needs: [omarchy.org](https://omarchy.org/) for the manual, the
+[Discord community](https://omarchy.org/discord), the
+[community themes](https://omarchy.org/themes/), and the
+[plugin marketplace](https://plugins.omarchy.org). Discord opens through
+`omarchy launch discord community`, so an installed Discord app wins over a
+browser tab.
+
+The plugin never launches OpenCode or sends a prompt; the user starts the agent
+and sends the example themselves.
 
 ## Install
 
