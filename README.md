@@ -114,6 +114,24 @@ After changing a locally installed plugin, rescan it with:
 omarchy shell shell rescanPlugins
 ```
 
+### Regenerating `preview.png`
+
+`preview.png` is a real capture of the panel rather than a mock-up, so it can be
+refreshed whenever the layout changes. Summon it, grab its window rectangle, and
+capture that:
+
+```bash
+id=io.github.signaldirective.make-it-real
+omarchy shell shell summon "$id" '{}'
+rect=$(hyprctl clients -j | jq -r '.[] | select(.title|test("Make It Real")) | "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')
+grim -g "$rect" preview.png
+omarchy shell shell hide "$id"
+```
+
+The panel sizes itself to its content, so the capture needs no cropping. If the
+window height was changed since the last shell start, restart the shell first —
+Quickshell keeps the existing surface size until then.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
